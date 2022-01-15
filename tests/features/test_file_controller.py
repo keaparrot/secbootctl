@@ -79,8 +79,10 @@ class TestFileController(unittest_helper.ControllerTestCase):
         ])
 
     @patch('sys.stdout', new_callable=StringIO)
+    @patch('secbootctl.features.file.Path.is_dir')
     @patch('secbootctl.features.file.glob')
-    def test_list_if_not_all_it_lists_only_efi_files(self, glob_patch_mock: MagicMock, stdout_mock: MagicMock):
+    def test_list_if_not_all_it_lists_only_efi_files(self, glob_patch_mock: MagicMock, path_is_dir_patch_mock,
+                                                     stdout_mock: MagicMock):
         esp_path = Path('/boot/efi')
         self._config_mock.configure_mock(esp_path=esp_path)
         glob_patch_mock.glob.return_value = [
@@ -88,6 +90,7 @@ class TestFileController(unittest_helper.ControllerTestCase):
             f'{esp_path}/EFI/Linux/test2.efi',
             f'{esp_path}/test3.efi'
         ]
+        path_is_dir_patch_mock.return_value = False
         self._sb_helper_mock.verify_file.side_effect = [True, False, True]
 
         self._controller.list(False)
@@ -107,8 +110,10 @@ class TestFileController(unittest_helper.ControllerTestCase):
         )
 
     @patch('sys.stdout', new_callable=StringIO)
+    @patch('secbootctl.features.file.Path.is_dir')
     @patch('secbootctl.features.file.glob')
-    def test_list_if_all_it_lists_all_files(self, glob_patch_mock: MagicMock, stdout_mock: MagicMock):
+    def test_list_if_all_it_lists_all_files(self, glob_patch_mock: MagicMock, path_is_dir_patch_mock,
+                                            stdout_mock: MagicMock):
         esp_path = Path('/boot/efi')
         self._config_mock.configure_mock(esp_path=esp_path)
         glob_patch_mock.glob.return_value = [
@@ -117,6 +122,7 @@ class TestFileController(unittest_helper.ControllerTestCase):
             f'{esp_path}/EFI/Linux/test4.txt',
             f'{esp_path}/test3.efi'
         ]
+        path_is_dir_patch_mock.return_value = False
         self._sb_helper_mock.verify_file.side_effect = [True, False, False, True]
 
         self._controller.list(True)

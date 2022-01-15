@@ -1,0 +1,10 @@
+[run]
+command_line = -m unittest discover -s tests/
+data_file = coverage/coverage-data
+omit = tests/*
+
+[html]
+directory = coverage
+
+[json]
+output = coverage/coverage.json

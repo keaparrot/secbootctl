@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Remove
+Type = Path
+Target = usr/lib/modules/*/vmlinuz
+
+[Action]
+Description = secbootctl pmi:hook-callback remove
+When = PreTransaction
+Exec = /usr/local/bin/secbootctl pmi:hook-callback remove
+Depends = python
+NeedsTargets

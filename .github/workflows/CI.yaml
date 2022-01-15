@@ -1,0 +1,57 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+#  pull_request:
+#    branches:
+#      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10']
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: run unit tests
+      run: |
+        python -m unittest discover -s tests/
+    - name: run coverage
+      if: ${{ matrix.python-version == '3.10' }}
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install coverage
+        coverage run
+        coverage json
+        tmp_coverage_result=`cat coverage/coverage.json`
+        coverage_percent=$(echo $tmp_coverage_result | jq .totals.percent_covered)
+        coverage_percent=${coverage_percent%.*}
+        if (( $coverage_percent < 40 )); then
+            coverage_color='red'
+        elif (( $coverage_percent < 60 )); then
+            coverage_color='orange'
+        elif (( $coverage_percent < 80 )); then
+            coverage_color='yellow'
+        elif (( $coverage_percent < 90 )); then
+            coverage_color='green'
+        else
+            coverage_color='brightgreen'
+        fi
+        echo "coverage_percent=$coverage_percent" >> $GITHUB_ENV
+        echo "coverage_color=$coverage_color" >> $GITHUB_ENV
+    - name: generate coverage badge
+      if: ${{ matrix.python-version == '3.10' }}
+      uses: schneegans/dynamic-badges-action@5ba090896c84b3521c7a75bd8f4de12656e3f426
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: 9fd0dadcb588aa4fbceac2609331623f
+        filename: secbootctl-coverage.json
+        label: Coverage
+        message: ${{ env.coverage_percent }}%
+        color: ${{ env.coverage_color }}
+        style: flat-square

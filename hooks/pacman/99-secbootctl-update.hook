@@ -1,0 +1,35 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = usr/lib/modules/*/vmlinuz
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Path
+Target = usr/lib/initcpio/*
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = intel-ucode
+Target = amd-ucode
+
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = systemd
+
+[Action]
+Description = secbootctl pmi:hook-callback update
+When = PostTransaction
+Exec = /usr/local/bin/secbootctl pmi:hook-callback update
+Depends = binutils
+Depends = python
+Depends = sbsigntools
+Depends = systemd
+NeedsTargets

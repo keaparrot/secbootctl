@@ -40,7 +40,7 @@ jobs:
         elif (( $coverage_percent < 90 )); then
             coverage_color='green'
         else
-            coverage_color='brightgreen'
+            coverage_color='30bb50'
         fi
         echo "coverage_percent=$coverage_percent" >> $GITHUB_ENV
         echo "coverage_color=$coverage_color" >> $GITHUB_ENV

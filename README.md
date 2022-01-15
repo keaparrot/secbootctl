@@ -1,5 +1,9 @@
 # secbootctl - Secure Boot Helper
 
+[![CI](https://github.com/keaparrot/secbootctl/actions/workflows/CI.yaml/badge.svg)](https://github.com/keaparrot/secbootctl/actions/workflows/CI.yaml)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/keaparrot-badge/9fd0dadcb588aa4fbceac2609331623f/raw/secbootctl-coverage.json)](https://github.com/keaparrot/secbootctl/actions/workflows/CI.yaml)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/keaparrot/secbootctl/blob/master/LICENSE.md)
+
 secbootctl is designed to simplify the process of using UEFI Secure Boot with
 your own custom keys under Linux. It helps to sign all files in the boot chain,
 like kernel and initramfs images, by creating so called unified kernel images
@@ -10,19 +14,19 @@ relevant package updates.
 
 ## Table of contents
 
-- [About the project](#about)
-- [Features](#features)
-- [Roadmap](#roadmap)
-- [Getting started](#getting)
-    - [Requirements ](#requirements)
-    - [Installation ](#installation)
-    - [Usage](#usage)
-    - [Configuration](#configuration)
-    - [Package manager integration](#pac)
-- [Limitations ](#limits)
-- [FAQ](#faq)
-- [Related projects](#relp)
-- [License](#license)
+- [About the project](https://github.com/keaparrot/secbootctl#about-the-project)
+- [Features](https://github.com/keaparrot/secbootctl#features)
+- [Roadmap](https://github.com/keaparrot/secbootctl#roadmap)
+- [Getting started](https://github.com/keaparrot/secbootctl#getting-started)
+    - [Requirements ](https://github.com/keaparrot/secbootctl#requirements)
+    - [Installation ](https://github.com/keaparrot/secbootctl#installation)
+    - [Usage](https://github.com/keaparrot/secbootctl#usage)
+    - [Configuration](https://github.com/keaparrot/secbootctl#configuration)
+    - [Package manager integration](https://github.com/keaparrot/secbootctl#package-manager-integration)
+- [Limitations ](https://github.com/keaparrot/secbootctl#limitations)
+- [FAQ](https://github.com/keaparrot/secbootctl#faq)
+- [Related projects](https://github.com/keaparrot/secbootctl#related-projects)
+- [License](https://github.com/keaparrot/secbootctl#license)
 
 ## About the project
 
@@ -99,7 +103,8 @@ Debian and Ubuntu (I just checked distributions I usually use myself).
 
 Currently key generation and key enrollment are not supported (but planned - see
 Roadmap). So you are required to generate your own custom Secure Boot keys and
-enroll them on your own beforehand (see [related resources](#related-resources)).
+enroll them on your own beforehand 
+(see [related resources](https://github.com/keaparrot/secbootctl#related-resources)).
 
 ### Installation
 
@@ -228,14 +233,14 @@ Mount point of the EFI System Partition (ESP). In general the mount point is
 "/boot", "/boot/efi" or "/efi".
 
 see
-also: [FAQ: Which mount point is recommended for the EFI System Partition (ESP)?](#faw)
+also: [FAQ: Which mount point is recommended for the EFI System Partition (ESP)?](https://github.com/keaparrot/secbootctl#which-mount-point-is-recommended-for-the-efi-system-partition-esp)
 
 **`sb_keys_path`** (default value: `/etc/secbootctl/keys`)
 
 Path of the directory that contains the Secure Boot keys. For signing only the
 Database Key (`db.key` and `db.crt`) is required.
 
-see also [FAQ: How do I securely store my Secure Boot keys?](#faq)
+see also [FAQ: How do I securely store my Secure Boot keys?](https://github.com/keaparrot/secbootctl#how-do-i-securely-store-my-secure-boot-keys)
 
 **`kernel_image_name_prefix`** (default value: `vmlinuz`)
 
@@ -470,4 +475,5 @@ Below a few resources with further more detailed information:
 
 ## License
 
-This project is released under the terms of the [MIT License](#license).
+This project is released under the terms of the 
+[MIT License](https://github.com/keaparrot/secbootctl/blob/master/LICENSE.md).

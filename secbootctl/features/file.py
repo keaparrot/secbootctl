@@ -17,6 +17,16 @@ class FileController(AppController):
         file_extension: str = '.efi' if not all else ''
         file_paths: list = glob.glob(str(self._config.esp_path / '**' / ('*' + file_extension)), recursive=True)
 
+        # If glob works case sensitive or insensitive seems to depend on the underlying filesystem. Thus next to
+        # search for ".efi" we search for ".EFI" too and merge both results.
+        if not all:
+            file_paths2: list = glob.glob(
+                str(self._config.esp_path / '**' / ('*' + file_extension.upper())), recursive=True
+            )
+            file_paths = list({*file_paths, *file_paths2})
+
+        file_paths.sort()
+
         for file_path in file_paths:
             file_path: Path = Path(file_path)
 

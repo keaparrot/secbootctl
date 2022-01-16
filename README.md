@@ -119,13 +119,13 @@ following files:
 - `secbootctl-{version}.tar.gz`
 - `secbootctl-{version}.tar.gz.asc`
 
-Example how to do it on the command-line with
+Example how to do it on the command-line (Bash) with
 [wget](https://www.gnu.org/software/wget/):
 
 ```
 release_version=$(wget -qO - https://api.github.com/repos/keaparrot/secbootctl/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version}.tar.gz"
-wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version}.tar.gz.asc"
+wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version:1}.tar.gz"
+wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version:1}.tar.gz.asc"
 ```
 
 **Step 2:** For security reasons it is highly recommended to verify that the
@@ -133,7 +133,7 @@ signature of the downloaded archive file is valid:
 
 ```
 gpg --import <(wget -qO - https://github.com/keaparrot.gpg)
-gpg --with-fingerprint --verify secbootctl-${release_version}.tar.gz.asc secbootctl-${release_version}.tar.gz
+gpg --with-fingerprint --verify secbootctl-${release_version:1}.tar.gz.asc secbootctl-${release_version:1}.tar.gz
 ```
 
 **Step 3:** Unpack the downloaded and verified archive file and execute

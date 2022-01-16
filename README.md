@@ -128,6 +128,9 @@ wget "https://github.com/keaparrot/secbootctl/releases/download/${release_versio
 wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version:1}.tar.gz.asc"
 ```
 
+(The variable `$release_version` contains the tag name e.g. "v0.1.0." and
+`${release_version:1}` is "0.1.0".)
+
 **Step 2:** For security reasons it is highly recommended to verify that the
 signature of the downloaded archive file is valid:
 
@@ -140,12 +143,12 @@ gpg --with-fingerprint --verify secbootctl-${release_version:1}.tar.gz.asc secbo
 the `install.py` script:
 
 ```
-tar -xvzf secbootctl-${release_version}.tar.gz
-cd secbootctl
-chmod +x install.sh
+tar -xvzf secbootctl-${release_version:1}.tar.gz
+cd secbootctl-${release_version:1}
+chmod +x install.py
 sudo ./install.py
 cd ..
-rm -R secbootctl
+rm -R secbootctl-${release_version:1}
 ```
 
 Steps done by the `install.py` script:

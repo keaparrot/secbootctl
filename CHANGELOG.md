@@ -7,7 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com).
 
 ## [Unreleased]
 
-nothing changed yet
+### Added
+
+- package manager integration support for apt
 
 ## [v0.1.0] - 2022-01-16
 

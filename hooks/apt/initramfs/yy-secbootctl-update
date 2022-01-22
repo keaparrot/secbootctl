@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -o errexit
+
+kernel_version="${1}"
+
+if [ -z "${kernel_version}" ]; then
+    exit 0
+fi
+
+# see https://kernel-team.pages.debian.net/kernel-handbook/ch-update-hooks.html
+case "${DPKG_MAINTSCRIPT_PACKAGE}" in
+    linux-image-*)
+        exit 0
+esac
+
+/usr/local/bin/secbootctl pmi:hook-callback update "${kernel_version}"

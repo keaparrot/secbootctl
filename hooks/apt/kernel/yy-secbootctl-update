@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -o errexit
+
+kernel_version="${1}"
+
+if [ -z "${kernel_version}" ]; then
+    exit 0
+fi
+
+/usr/local/bin/secbootctl pmi:hook-callback update "${kernel_version}"

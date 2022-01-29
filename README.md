@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/keaparrot/secbootctl/blob/master/LICENSE.md)
 
 secbootctl is designed to simplify the process of using UEFI Secure Boot with
-your own custom keys under Linux. It helps to sign all files in the boot chain,
+your own custom keys with Linux. It helps to sign all files in the boot chain,
 like kernel and initramfs images, by creating so called unified kernel images
 that will be signed and installed on the EFI system partition (ESP). Furthermore
 it can be used to manage the bootloader systemd-boot. Used together with your
@@ -69,7 +69,12 @@ Below a list of what you can do with secbootctl:
 - customize configuration via configuration file
 - package manager integration for automation
     - supported package managers:
+        - apt (Debian, Ubuntu, etc.)
         - pacman (Arch Linux)
+- security token support
+  - use Secure Boot key (Database Key) that is stored on a security token
+  - supported tokens:
+    - YubiKey
 
 ## Roadmap
 
@@ -79,11 +84,11 @@ Features & ideas that might be implemented in any future releases:
 - key enrollment
 - key backup
 - cmdline setting via configuration file
-- support of using keys stored on a security token (e.g. Yubikey)
-  via [PKCS#11-API](https://en.wikipedia.org/wiki/PKCS_11)
 - support of non-bootloader usage (direct booting via UEFI firmware itself)
-- support for integration with other package managers (probably starting with
-  apt because besides Arch Linux I regularly use Xubuntu)
+- support of more security tokens like NitroKey
+- make PKCS#11-URI configurable
+- improve install script
+- improve error handling in general (may add cli option for verbosity)
 
 ## Getting started
 
@@ -116,39 +121,36 @@ your web browser on the
 or do it in your terminal on the command-line. In both cases download the 
 following files:
 
-- `secbootctl-{version}.tar.gz`
-- `secbootctl-{version}.tar.gz.asc`
+- `secbootctl-{release_version}.tar.gz`
+- `secbootctl-{release_version}.tar.gz.asc`
 
 Example how to do it on the command-line (Bash) with
 [wget](https://www.gnu.org/software/wget/):
 
 ```
-release_version=$(wget -qO - https://api.github.com/repos/keaparrot/secbootctl/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version:1}.tar.gz"
-wget "https://github.com/keaparrot/secbootctl/releases/download/${release_version}/secbootctl-${release_version:1}.tar.gz.asc"
+release_version=0.2.0
+wget "https://github.com/keaparrot/secbootctl/releases/download/v${release_version}/secbootctl-${release_version}.tar.gz"
+wget "https://github.com/keaparrot/secbootctl/releases/download/v${release_version}/secbootctl-${release_version}.tar.gz.asc"
 ```
-
-(The variable `$release_version` contains the tag name e.g. "v0.1.0." and
-`${release_version:1}` is "0.1.0".)
 
 **Step 2:** For security reasons it is highly recommended to verify that the
 signature of the downloaded archive file is valid:
 
 ```
 gpg --import <(wget -qO - https://github.com/keaparrot.gpg)
-gpg --with-fingerprint --verify secbootctl-${release_version:1}.tar.gz.asc secbootctl-${release_version:1}.tar.gz
+gpg --with-fingerprint --verify secbootctl-${release_version}.tar.gz.asc secbootctl-${release_version}.tar.gz
 ```
 
 **Step 3:** Unpack the downloaded and verified archive file and execute
 the `install.py` script:
 
 ```
-tar -xvzf secbootctl-${release_version:1}.tar.gz
-cd secbootctl-${release_version:1}
+tar -xvzf secbootctl-${release_version}.tar.gz
+cd secbootctl-${release_version}
 chmod +x install.py
 sudo ./install.py
 cd ..
-rm -R secbootctl-${release_version:1}
+rm -R secbootctl-${release_version}
 ```
 
 Steps done by the `install.py` script:
@@ -209,12 +211,12 @@ Use "secbootctl [command] --help" for more information about a command.
 ```
 
 To install bootloader, default kernel and update bootloader menu call the
-following commands (command output is omitted):
+following commands with root permissions (command output is omitted):
 
 ```
-~$ sudo secbootctl bootloader:install
-~$ sudo secbootctl kernel:install
-~$ sudo secbootctl bootloader:update-menu
+~# secbootctl bootloader:install
+~# secbootctl kernel:install
+~# secbootctl bootloader:update-menu
 ```
 
 If everything went well you can call `bootloader:status` just to verify 
@@ -241,7 +243,8 @@ also: [FAQ: Which mount point is recommended for the EFI System Partition (ESP)?
 **`sb_keys_path`** (default value: `/etc/secbootctl/keys`)
 
 Path of the directory that contains the Secure Boot keys. For signing only the
-Database Key (`db.key` and `db.crt`) is required.
+Database Key (`db.key` and `db.crt`) is required. If using security token
+support then `db.key` is not required.
 
 see also [FAQ: How do I securely store my Secure Boot keys?](https://github.com/keaparrot/secbootctl#how-do-i-securely-store-my-secure-boot-keys)
 
@@ -304,15 +307,15 @@ see: [Arch-Wiki: microcode](https://wiki.archlinux.org/title/microcode)
 
 **`bootloader_menu_editor`** (default value: `no`)
 
-Choose `yes` if kernel parameters should be editable otherwise `no`. Securitywise
-it's advised to disable this option.
+Choose `yes` if kernel parameters should be editable otherwise `no`. 
+Security-wise it's advised to disable this option.
 
 For details
 see: [systemd-boot - loader.conf](https://www.freedesktop.org/software/systemd/man/loader.conf.html)
 
 **`bootloader_menu_timeout`** (default value: `5`)
 
-Time in seconds the booloader menu is shown before the default bootloader menu
+Time in seconds the bootloader menu is shown before the default bootloader menu
 entry is booted.
 
 For details
@@ -322,6 +325,14 @@ see:[systemd-boot - loader.conf](https://www.freedesktop.org/software/systemd/ma
 
 Name of the package manager that will used when using package manager
 integration feature.
+
+**`use_security_token`** (default value: `no`)
+
+Whether security token shall be used for signing ("yes") or not ("no").
+
+**`security_token`** (default value: `yubikey`)
+
+Name of the security token that will be used for signing.
 
 ### Package manager integration
 
@@ -339,23 +350,41 @@ integration use `pmi:remove` to remove the hook files.
 
 Curently supported package managers:
 
+- apt (Debian, Ubuntu, etc.)
 - pacman (Arch Linux)
-    - hook files:
-        - `99-secbootctl-update.hook`
-        - `99-secbootctl-remove.hook`
-    - hook directory: `/etc/pacman.d`
+
+### Security token support
+
+secbootctl is able to use a Secure Boot key (Database Key) that is stored on
+a security token by using the 
+[PKCS#11-API](https://en.wikipedia.org/wiki/PKCS_11). Currently only YubiKey 
+is supported. Moreover the key has to be stored in slot 9c 
+(see [YubiKey - PIV certificate slots](https://developers.yubico.com/PIV/Introduction/Certificate_slots.html)).
+Be aware that for every signing action you have to enter the PIN of your
+security token. 
+
+In order to work properly you have to install an appropriate PKCS#11-API library
+on your system 
+[sbsign](https://man.archlinux.org/man/extra/sbsigntools/sbsign.1.en) can
+interact with. 
+
+Note: The public Database Key certificate `db.crt` still have to be stored
+in `<sb_keys_path>`.
 
 ## Limitations
 
 Here you find a list of known limitations and issues:
 
 - only relevant for Arch Linux:
-    - Setting config value `latest` for `default_kernel` configuration doesn't
-      make sense and therefore might not work as expected.
-    - For an initramfs fallback image no additional unified kernel image will be
-      created.
-    - Currently pacman update hook (`pmi:hook-callback` command) always (re-)
-      creates unified kernel images for all kernels found.
+  - Setting config value `latest` for `default_kernel` configuration doesn't
+    make sense and therefore might not work as expected.
+  - For an initramfs fallback image no additional unified kernel image will be
+    created.
+  - Currently pacman update hook (`pmi:hook-callback` command) always (re-)
+    creates unified kernel images for all kernels found.
+- only relevant for package manager integration with apt:
+  - Updates of systemd-boot are not detectable and thus systemd-boot is not
+    getting updated automatically.
 - only relevant for non Arch Linux distributions:
   - Change `package:manager` config option to something different than `pacman`
     otherwise `bootloader:update-menu` fails. As long as you don't 
@@ -372,9 +401,9 @@ Nevertheless you can choose any other mount point like the often
 used `/boot/efi`. When using a mount point other than `/efi` you have to set the
 config option `esp_path` in the configuration file accordingly.
 
-Securitywise you should not use `/boot` as ESP mount point. `/boot` contains the
-unsigned original kernel, initramfs and microcode images that secbootctl uses to
-create signed unified kernel images which will then be copied into the
+Security-wise you should not use `/boot` as ESP mount point. `/boot` contains
+the unsigned original kernel, initramfs and microcode images that secbootctl 
+uses to create signed unified kernel images which will then be copied into the
 appropriate directory on the ESP. Because the ESP is unencrypted an attacker
 could do an evil maid attack by tampering any of the original images that you
 might, unknowingly about the malicous changes, sign and boot afterwards. That's
@@ -422,13 +451,13 @@ encryption (FDE) anyway.
 
 Of course it would be more ideal if the Secure Boot keys are stored encrypted.
 So if you don't mind to always enter your passphrase when using secbootctl for
-signing, you can use encrypted keys as well. Far more secure it would be to use 
-keys stored on a security token like a YubiKey. Moreover it might be possible
-to encrypt the keys with the 
+signing, you can use encrypted keys as well. 
+
+Far more secure it would be to use keys stored on a security token like a 
+YubiKey which is supported by secbooctl. Moreover it might be possible to 
+encrypt the keys with the
 [TPM](https://en.wikipedia.org/wiki/Trusted_Platform_Module) like it is possible
 with SSH keys and use them without the need of always entering the passphrase.
-Currently neither the security token nor the TPM option is supported 
-by secbootctl.
 
 ### Can I use my bootloader of choice?
 

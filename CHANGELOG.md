@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com).
 ### Added
 
 - package manager integration support for apt
+- add security token support (YubiKey)
 
 ## [v0.1.0] - 2022-01-16
 

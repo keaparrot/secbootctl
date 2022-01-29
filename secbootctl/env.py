@@ -9,7 +9,7 @@ from pathlib import Path
 
 class Env:
     APP_NAME: str = 'secbootctl'
-    APP_VERSION: str = '0.1.0'
+    APP_VERSION: str = '0.2.0'
     APP_TITLE: str = f'{APP_NAME} v{APP_VERSION} - Secure Boot Helper'
     APP_CONFIG_FILE_PATH: Path = Path(f'/etc/{APP_NAME}/{APP_NAME}.conf')
     APP_HOOK_PATH: Path = Path(f'/etc/{APP_NAME}/hooks')

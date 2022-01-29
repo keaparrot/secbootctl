@@ -183,7 +183,7 @@ not present then `/proc/cmdline` will be used as fallback.
 
 ```
 ~$ secbootctl 
-secbootctl v0.1 - Secure Boot Helper
+secbootctl v0.2.0 - Secure Boot Helper
 
 Usage: secbootctl [-h] [-V] [command] ...
 

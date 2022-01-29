@@ -47,6 +47,26 @@ class TestSecureBootHelper(unittest.TestCase):
         )
 
     @patch('secbootctl.helpers.secureboot.subprocess')
+    def test_sign_file_if_use_token_and_signing_is_successful_it_returns_true(self, subprocess_patch_mock: MagicMock):
+        subprocess_patch_mock.run.return_value = self._process_result_mock
+        self._process_result_mock.configure_mock(returncode=0)
+
+        self.assertTrue(
+            self._sb_helper.sign_file(self._file_path, True)
+        )
+
+        subprocess_patch_mock.run.assert_called_once_with(
+            [
+                'sbsign',
+                '--engine=pkcs11',
+                '--key=pkcs11:manufacturer=piv_II;id=%02',
+                f'--cert={self._db_cert_file_path}',
+                f'--output={self._file_path}',
+                self._file_path
+            ], capture_output=True
+        )
+
+    @patch('secbootctl.helpers.secureboot.subprocess')
     def test_sign_file_if_signing_fails_it_returns_false(self, subprocess_patch_mock: MagicMock):
         subprocess_patch_mock.run.return_value = self._process_result_mock
         self._process_result_mock.configure_mock(returncode=1)
@@ -59,6 +79,26 @@ class TestSecureBootHelper(unittest.TestCase):
             [
                 'sbsign',
                 f'--key={self._db_key_file_path}',
+                f'--cert={self._db_cert_file_path}',
+                f'--output={self._file_path}',
+                self._file_path
+            ], capture_output=True
+        )
+
+    @patch('secbootctl.helpers.secureboot.subprocess')
+    def test_sign_file_if_use_token_and_signing_fails_it_returns_false(self, subprocess_patch_mock: MagicMock):
+        subprocess_patch_mock.run.return_value = self._process_result_mock
+        self._process_result_mock.configure_mock(returncode=1)
+
+        self.assertFalse(
+            self._sb_helper.sign_file(self._file_path, True)
+        )
+
+        subprocess_patch_mock.run.assert_called_once_with(
+            [
+                'sbsign',
+                '--engine=pkcs11',
+                '--key=pkcs11:manufacturer=piv_II;id=%02',
                 f'--cert={self._db_cert_file_path}',
                 f'--output={self._file_path}',
                 self._file_path

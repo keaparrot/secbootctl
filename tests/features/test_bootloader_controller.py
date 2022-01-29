@@ -55,8 +55,8 @@ class TestKernelController(unittest_helper.ControllerTestCase):
             capture_output=True
         )
         self._sb_helper_mock.sign_file.assert_has_calls([
-            call(default_boot_file_path),
-            call(systemd_boot_file_path)
+            call(default_boot_file_path, False),
+            call(systemd_boot_file_path, False)
         ])
         self._sb_helper_mock.verify_file.assert_has_calls([
             call(default_boot_file_path),
@@ -132,8 +132,8 @@ class TestKernelController(unittest_helper.ControllerTestCase):
             capture_output=True
         )
         self._sb_helper_mock.sign_file.assert_has_calls([
-            call(default_boot_file_path),
-            call(systemd_boot_file_path)
+            call(default_boot_file_path, False),
+            call(systemd_boot_file_path, False)
         ])
         self._sb_helper_mock.verify_file.assert_has_calls([
             call(default_boot_file_path),

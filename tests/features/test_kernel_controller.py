@@ -29,7 +29,7 @@ class TestKernelController(unittest_helper.ControllerTestCase):
             kernel_name, unified_kernel_image_path
         )
         self._sb_helper_mock.sign_file.assert_called_once_with(
-            unified_kernel_image_path
+            unified_kernel_image_path, False
         )
         self._sb_helper_mock.verify_file.assert_called_once_with(
             unified_kernel_image_path
@@ -61,7 +61,7 @@ class TestKernelController(unittest_helper.ControllerTestCase):
             kernel_name, unified_kernel_image_path
         )
         self._sb_helper_mock.sign_file.assert_called_once_with(
-            unified_kernel_image_path
+            unified_kernel_image_path, False
         )
         self._sb_helper_mock.verify_file.assert_called_once_with(
             unified_kernel_image_path

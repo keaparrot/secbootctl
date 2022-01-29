@@ -21,7 +21,9 @@ class TestConfig(unittest.TestCase):
             'microcode_image_name': 'micorocode123',
             'bootloader_menu_editor': 'yes',
             'bootloader_menu_timeout': 5,
-            'package_manager': 'pacman123'
+            'package_manager': 'pacman123',
+            'use_security_token': 'yes',
+            'security_token': 'token'
         }
         self._config._config_data = self._config_data
 
@@ -144,6 +146,24 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(
             self._config_data['package_manager'],
             self._config.package_manager_name
+        )
+
+    def test_use_security_token_if_yes_it_returns_true(self):
+        self.assertTrue(
+            self._config.use_security_token
+        )
+
+    def test_use_security_token_if_no_it_returns_false(self):
+        self._config._config_data['use_security_token'] = 'no'
+
+        self.assertFalse(
+            self._config.use_security_token
+        )
+
+    def test_security_token_name_it_returns_security_token_name(self):
+        self.assertEqual(
+            self._config_data['security_token'],
+            self._config.security_token_name
         )
 
 

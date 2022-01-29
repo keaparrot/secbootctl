@@ -20,6 +20,7 @@ class ControllerTestCase(unittest.TestCase):
     def setUp(self, cli_print_helper_patch_mock: MagicMock, kernel_os_helper_patch_mock: MagicMock,
               sb_helper_patch_mock: MagicMock) -> None:
         self._config_mock: Mock = Mock()
+        self._config_mock.configure_mock(use_security_token=False)
         self._dispatcher_mock: Mock = Mock()
         self._cli_print_helper_mock: Mock = Mock()
         cli_print_helper_patch_mock.return_value = self._cli_print_helper_mock
@@ -54,6 +55,61 @@ class ControllerTestCase(unittest.TestCase):
 
     def test_init_it_checks_requirements(self):
         self._kernel_os_helper_mock.check_requirements.assert_called_once()
+
+    @patch('secbootctl.core.SecureBootHelper')
+    @patch('secbootctl.core.KernelOsHelper')
+    @patch('secbootctl.core.CliPrintHelper')
+    def test_init_it_checks_security_token_and_raises_no_error_if_supported(
+        self,
+        cli_print_helper_patch_mock: MagicMock,
+        kernel_os_helper_patch_mock: MagicMock,
+        sb_helper_patch_mock: MagicMock
+    ):
+        security_token_name: str = 'yubikey'
+        self._config_mock.configure_mock(use_security_token=True, security_token_name=security_token_name)
+
+        if self.FEATURE_NAME == 'app':
+            AppController(self._config_mock, self._dispatcher_mock)
+        else:
+            feature_module: ModuleType = importlib.import_module('secbootctl.features.' + self.FEATURE_NAME)
+
+            getattr(
+                feature_module,
+                self.FEATURE_NAME.capitalize() + 'Controller'
+            )(self._config_mock, self._dispatcher_mock)
+
+    @patch('secbootctl.core.SecureBootHelper')
+    @patch('secbootctl.core.KernelOsHelper')
+    @patch('secbootctl.core.CliPrintHelper')
+    def test_init_it_checks_security_token_and_raises_error_if_not_supported(
+        self,
+        cli_print_helper_patch_mock: MagicMock,
+        kernel_os_helper_patch_mock: MagicMock,
+        sb_helper_patch_mock: MagicMock
+    ):
+        security_token_name: str = 'xyz-token'
+        self._config_mock.configure_mock(use_security_token=True, security_token_name=security_token_name)
+
+        with self.assertRaises(AppError) as context_manager:
+            if self.FEATURE_NAME == 'app':
+                AppController(self._config_mock, self._dispatcher_mock)
+            else:
+                feature_module: ModuleType = importlib.import_module('secbootctl.features.' + self.FEATURE_NAME)
+
+                getattr(
+                    feature_module,
+                    self.FEATURE_NAME.capitalize() + 'Controller'
+                )(self._config_mock, self._dispatcher_mock)
+
+        error: AppError = context_manager.exception
+        self.assertEqual(
+            error.message,
+            f'configured security token "{security_token_name}" is not supported'
+        )
+        self.assertEqual(
+            error.code,
+            1
+        )
 
     def test_forward_if_no_params_given_it_forwards_given_controller_action_with_no_params(self):
         feature_name: str = 'bootloader'
@@ -103,7 +159,22 @@ class ControllerTestCase(unittest.TestCase):
         self._controller._sign_file(file_path)
 
         self._sb_helper_mock.sign_file.assert_called_once_with(
-            file_path
+            file_path, False
+        )
+        self._cli_print_helper_mock.print_status.assert_has_calls([
+            call(f'signing: {file_path}', CliPrintHelper.Status.PENDING),
+            call(f'signed: {file_path}', CliPrintHelper.Status.SUCCESS)
+        ])
+
+    def test_sign_file_if_use_security_token_it_signs_given_file(self):
+        file_path: Path = Path('/tmp/file.efi')
+        self._sb_helper_mock.sign_file.return_value = True
+        self._config_mock.configure_mock(use_security_token=True)
+
+        self._controller._sign_file(file_path)
+
+        self._sb_helper_mock.sign_file.assert_called_once_with(
+            file_path, True
         )
         self._cli_print_helper_mock.print_status.assert_has_calls([
             call(f'signing: {file_path}', CliPrintHelper.Status.PENDING),
@@ -122,7 +193,7 @@ class ControllerTestCase(unittest.TestCase):
             f'signing: {file_path}', CliPrintHelper.Status.PENDING
         )
         self._sb_helper_mock.sign_file.assert_called_once_with(
-            file_path
+            file_path, False
         )
         self.assertEqual(
             error.message,

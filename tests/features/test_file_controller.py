@@ -93,7 +93,7 @@ class TestFileController(unittest_helper.ControllerTestCase):
         self._controller.sign(str(file_path))
 
         self._sb_helper_mock.sign_file.assert_called_once_with(
-            file_path
+            file_path, False
         )
         self._cli_print_helper_mock.print_status.assert_has_calls([
             call(f'signing: {file_path}', CliPrintHelper.Status.PENDING),
@@ -112,7 +112,7 @@ class TestFileController(unittest_helper.ControllerTestCase):
             f'signing: {file_path}', CliPrintHelper.Status.PENDING
         )
         self._sb_helper_mock.sign_file.assert_called_once_with(
-            file_path
+            file_path, False
         )
         self.assertEqual(
             error.message,

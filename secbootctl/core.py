@@ -117,6 +117,14 @@ class Config:
     def package_manager_name(self) -> str:
         return self._get('package_manager')
 
+    @property
+    def use_security_token(self) -> bool:
+        return True if self._get('use_security_token') == 'yes' else False
+
+    @property
+    def security_token_name(self) -> str:
+        return self._get('security_token')
+
     def _get(self, key: str, fallback_value: Any = None) -> Any:
         return self._config_data.get(key, fallback_value)
 
@@ -163,7 +171,7 @@ class CliCmdManager:
         self._cli_parser.epilog = textwrap.dedent(f'''
             Use "{Env.APP_NAME} [command] --help" for more information about a command.
 
-            Config:
+            Configuration:
               For {Env.APP_NAME} to work properly on your system you might need to adjust
               the default config. The config file is expected
               to be in "{Env.APP_CONFIG_FILE_PATH}".
@@ -177,6 +185,13 @@ class CliCmdManager:
 
               Currently the following package managers are supported:
               {', '.join(Env.SUPPORTED_PACKAGE_MANAGERS)}
+
+            Security-Token-Support:
+              It is possible to use a Secure Boot key (Database Key) for signing
+              that is stored securely on security token.
+
+              Currently the following security tokens are supported:
+              {', '.join(Env.SUPPORTED_SECURITY_TOKENS)}
         ''')
 
         self._cli_parser.add_argument('-h', '--help', action='help', help='show this help')
@@ -242,6 +257,16 @@ class AppController:
         self._sb_helper: SecureBootHelper = SecureBootHelper(config.sb_keys_path)
 
         self._kernel_os_helper.check_requirements()
+        self._check_config()
+
+    def _check_config(self):
+        self._check_security_token()
+
+    def _check_security_token(self) -> None:
+        security_token_name: str = self._config.security_token_name
+
+        if self._config.use_security_token and security_token_name not in Env.SUPPORTED_SECURITY_TOKENS:
+            raise AppError(f'configured security token "{security_token_name}" is not supported')
 
     def _forward(self, feature_name: str, action_name: str, params: Optional[dict] = None):
         """Invokes controller action for given feature, controller and action name."""
@@ -261,7 +286,7 @@ class AppController:
     def _sign_file(self, file_path: Path) -> None:
         self._print_status(f'signing: {file_path}')
 
-        if not self._sb_helper.sign_file(file_path):
+        if not self._sb_helper.sign_file(file_path, self._config.use_security_token):
             raise AppError(f'failed to sign: {file_path}')
 
         self._print_status(f'signed: {file_path}', CliPrintHelper.Status.SUCCESS)

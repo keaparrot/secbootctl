@@ -26,6 +26,7 @@ class Env:
     OS_RELEASE_FILE_PATH: Path = Path('/etc/os-release')
     SB_KEY_NAME_DB: str = 'db'
     SUPPORTED_PACKAGE_MANAGERS: list = ['pacman', 'apt']
+    SUPPORTED_SECURITY_TOKENS: list = ['yubikey']
     UNIFIED_IMAGE_SUBPATH: str = 'EFI/Linux'
 
     @staticmethod

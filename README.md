@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](https://github.com/keaparrot/secbootctl/blob/master/LICENSE.md)
 
 secbootctl is designed to simplify the process of using UEFI Secure Boot with
-your own custom keys with Linux. It helps to sign all files in the boot chain,
+your own custom keys and Linux. It helps to sign all files in the boot chain,
 like kernel and initramfs images, by creating so called unified kernel images
 that will be signed and installed on the EFI system partition (ESP). Furthermore
 it can be used to manage the bootloader systemd-boot. Used together with your

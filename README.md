@@ -23,6 +23,7 @@ relevant package updates.
     - [Usage](https://github.com/keaparrot/secbootctl#usage)
     - [Configuration](https://github.com/keaparrot/secbootctl#configuration)
     - [Package manager integration](https://github.com/keaparrot/secbootctl#package-manager-integration)
+    - [Security token support](https://github.com/keaparrot/secbootctl#security-token-support)
 - [Limitations ](https://github.com/keaparrot/secbootctl#limitations)
 - [FAQ](https://github.com/keaparrot/secbootctl#faq)
 - [Related projects](https://github.com/keaparrot/secbootctl#related-projects)
